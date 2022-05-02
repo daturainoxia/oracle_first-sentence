@@ -1,0 +1,474 @@
+--내장함수 
+--문자 데이터를 가공하는 문자 함수
+--UPPER(문자열) , LOWER(문자열), INITCAP(문자열)
+
+SELECT ENAME, UPPER(ENAME), LOWER(ENAME), INITCAP(ENAME)
+FROM EMP
+--대 소문자 여부와 상관없이 검색 단어와 일치한 문자열이 포함한 데이터를 찾을수 있게 만들어 준다.
+SELECT *
+FROM 게시판테이블
+WHERE 게시판 제목 열 LIKE '%Oracle%'
+OR 게시판 제목 열 LIKE '%Oracle%'              Oracle ORACLE oracle orAcLe
+OR  UPPER게시판 제목 열 LIKE UPPER '%Oracle%'  
+
+--UPPER 함수로 문자열 비교하기 (사원 이름이 SCOTT인 데이터 찾기)
+
+SELECT *
+FROM EMP
+WHERE UPPER(ENAME) = UPPER('smith');
+
+
+SELECT *
+FROM EMP
+WHERE UPPER(ENAME) LIKE UPPER('%smith%');
+
+select * from emp;
+
+--문자열 길이를 구하는 LENGTH함수
+SELECT ENAME, LENGTH(ENAME)
+FROM EMP;
+
+SELECT ENAME, LENGTH(ENAME)
+FROM EMP
+WHERE LENGTH(ENAME) >=5;
+
+--LENGTH() , LENGTH()
+SELECT LENGTH('한글') FROM DUAL;
+
+영문 : 1BYTE
+한글 : 2BYTE
+
+SELECT LENGTH('한글'),LENGTHB('한글') FROM DUAL
+
+SELECT * FROM EMP;
+
+--직원테이블(EMP)에서 직책(JOB)이 6글자 이상인 데이터만 출력
+SELECT *
+FROM EMP
+WHERE LENGTH(JOB) >=6;
+
+-- SUBSTR 함수 : 문자열 일부를 추출
+SELECT JOB, SUBSTR(JOB, 1, 2), SUBSTR(JOB,3 , 2),SUBSTR(JOB, 5)
+FROM EMP;
+
+--SUBSTR 함수를 사용하여 EMP 테이블의 모든 사원 이름을 세번째 글자부터 끝까지 출력
+SELECT SUBSTR(ENAME,3)
+FROM EMP;
+
+--SUBSTR 함수 안에 다른 함수 (LEMGTH)함께 사용하기
+SELECT JOB
+SUBSTR(JOB,-LENGHT(JOB)), -- SUBSTR(job, -5)
+SUBSTR(JOB,-LENGHT(JOB),2) --substr(job, -5,2)
+SUBSTR(JOB,-3)
+FROM EMP;
+
+-- 문자열 데이터 안에서 특정 문자 위치를 찾는 INSTR 함수
+INSTR(대상 문자열 데이터(필수)]),
+[위치를 찾으려는 부분 문자(필수)],
+[위치를 찾기를 시작할 대상 문자열 데이터 위치(선택, 기본값은 1)],
+[시작 위치에서 찾으려는 무자가 몇 번쨰인지 지저(선택, 기본값은 1)])
+
+SELECT INSTR('HELLO, ORACLE!','L')AS INSTR_1,  --첫번째 L의 위치
+       INSTR('HELLO, ORACLE!','L', 5)AS INSTR_2, --5번째 문자 시작해서 다음 L 위치
+       INSTR('HELLO, ORACLE!','L', 2, 2)AS INSTR_3, --2번째 문자 시작해서 두번쨰 L의 위치
+FROM DUAL;
+
+--특정 문자를 포함하고 있는 행 찾기
+--INSTR 함수로 사원 이름에 문자 S가 있는 행 구하기
+SELECT *
+FROM EMP
+WHERE INSTR(ENAME, 'S') > 0;
+
+SELECT *
+FROM EMP
+WHERE ENAME LIKE '%S%';
+
+--특정 문자를 다른 ㅁ누자로 바꾸는 REPLACE 함수(치환)
+REPLACE ([문자열 데이터 또는 열 이름(필수)], [찾는 문자(필수)], [대체할 문자(선택)]
+대체할 문자 부분을 비원 둔다면 찾는 문자는 삭제가 된다.
+
+SELECT '010-1234-5678' AS REPLACE_BEFORE,
+REPLACE('010-1234-5678','-', ' ')AS REPLACE_1,
+REPLACE('010-1234-5678','-')AS REPLACE_2,
+FROM DUAL;
+
+--패딩 : 빈공간을 채우는 것
+--데이터의 빈 공간을 특정 문자로 채우는 LPAD, RPAD함수
+LPAD([문자열 데이터 또는 열이름 (필수)], [데이터의 자리수(필수)],[빈 공간에 채울 문자(선택)]
+ABCDEF, 10 ,'#'  ####ABCDEFG
+RPAD([문자열 데이터 또는 열이름 (필수)], [데이터의 자리수(필수)],[빈 공간에 채울 문자(선택)]
+ABCDEF, 10 ,'#'  ABCDEFG####
+
+SELECT'Oracle'
+LAPD('Oracle', 10, '#')AS LPAD_1   
+RAPD('Oracle', 10, '#')AS LPAD_1
+LAPD('Oracle', 10)AS LPAD_2
+RAPD('Oracle', 10)AS RPAD_2
+FROM DUAL;
+
+--두 문자열 데이터를 합치는 CONCAT 함수
+SELECT CONCAT(문자열 데이터1 또는 열이름1, 문자열 데이터2 또는 열이름2),        --열이름1열이름2
+      CONCAT(문자열 데이터1 또는 열이름1,CONCAY(':',문자열 데이터2 또는 열이름2)) --열이름1 : 열이름2
+       FROM 테이블 이름;
+       
+SELECT CONCAT(EMPNO , ENAME).
+         CONCAT(EMPNO, CONCAT(' : ',ENAME))
+         FROM EMP
+         WHERE ENAME = 'SMITH';
+         
+--CONCAT과 비슷한 문자열 연결 연산자 ||
+SELECT EMPNO || ' : ' || ENAME
+FROM EMP
+WHERE ENAME = 'SMITH';
+
+--특정 문자를 지우는 TRIM, LTRIM, RTRIN 함수
+--옵션 : LEADING(왼쪽에 있는 글자), TRAILING(오른쪽에 있는 글자), BOTH(양쪽의 글자)
+--TRIM 함수
+TRIM([삭제할 옵션(선택)] [삭제할 문자(선택)] FROM[원본 문자열 데이터(필수)])
+
+--TRIM 함수 사용하기 (삭제할 문자가 없을때)
+SELECT '[' || TRIM ('_ _'ORACLE_ _') || ']' AS TRIM,
+      '[' || TRIM (LEADING FROM '_' ORACLE_ _') || ']' AS TRIM_LEADING,
+      '[' || TRIM (TRAILING FROM'_' ORACLE_ _') || ']' AS TRIM_TRAILING,
+      '[' || TRIM (BOTH FROM'_'ORACLE_ _') || ']' AS TRIM_BOTH 
+      FROM DUAL;
+
+--TRIM 함수 사용하기 (삭제할 문자가 있을때)
+
+SELECT '[' || TRIM ('_' FROM '_ _ORACLE_ _') || ']' AS TRIM,
+      '[' || TRIM (LEADING '_' FROM '_ _ ORACLE_ _') || ']' AS TRIM_LEADING,
+      '[' || TRIM (TRAILING '_' FROM'_ _ ORACLE_ _') || ']' AS TRIM_TRAILING,
+      '[' || TRIM (BOTH '_' FROM '_ _ ORACLE_ _') || ']' AS TRIM_BOTH
+      FROM DUAL;
+      
+--LTRIM, RTRIM 함수
+LTRIM([원본 문자열 데이터(필수)], [삭제할 문자 집합(선택)])
+RTRIM([원본 문자열 데이터(필수)], [삭제할 문자 집합(선택)])
+
+SELECT '[' || TRIM('_ORACLE_') || ']' AS TRIM,
+       '[' || LTRIM('_ORACLE_') || ']' AS LTRIM,
+       '[' || LTRIM('<_ORACLE_>', '<_ || ']' AS LTRIM_2,
+       '[' || RTRIM('_ORACLE_') || ']' AS RTRIM,
+       '[' || RTRIM('<_ORACLE_>','_>') || ']' AS RTRIM_2,
+       FROM DUAL;
+       
+--숫자 함수 : 숫자 데이터를 연산하고 수치를 조정
+--ROUND : 지정된 숫자의 특정 위치에서 반올림 값   :반올림
+--TRUNC : 지정된 숫자의 특정 위치에서 값을 버림   :자릿수 버림
+--CEIL : 지정된 숫자보다 큰 정수 중 가장 작은 정수를 반환   :큰 정수
+--FLOOR : 지정된 숫자보다 작은 정수 중 가장 큰 정수를 반환   :작은정수
+--MOD : 짖어된 숫자를 나눈 나머지 값을 반환   :나머지
+
+--ROUND  : 반올림
+ROUND[숫자(필수)], [반올림 위치(선택)])
+반올림 위치 선택 안 할 시 : 소수점 1번쨰 자리에서 반올림
+
+SELECT ROUND(1234.5678)AS ROUND,      --양수만 출력, 소수점 1번쨰 자리에서 반올림
+       ROUND(1234.5678, 0)AS ROUND_0, --양수까지만 출력, 소수점 1번쨰 반올림
+       ROUND(1234.5678, 1)AS ROUND_1, --소수점 1번쨰 자리까지 출력 소수점 2번쨰 반올림
+       ROUND(1234.5678, 2)AS ROUND_2, --소수점 2번쨰 자리까지 출력 소수점 3번쨰 반올림
+       ROUND(1234.5678, -1)AS ROUND_MINUS1, -- -양수 자리 지정, 양수 1번쨰 자리에서 반올림
+       ROUND(1234.5678, -2)AS ROUND_MINUS2 -- -양수 자맂 지정, 양수 2번쨰 자리에서 반올림
+       FROM DUAL;
+
+--TRUNC : 자릿수 버림
+TRUNC([숫자(필수)], [버림 위치(선택)])
+버림위치 선택 안할시 : 소수점 1 번째 자리부터 버림
+
+SELECT TRUNC(1234.5678)AS TRUNC,      --양수만 출력, 소수점 1번쨰 자리에서 버림
+       TRUNC(1234.5678, 0)AS TRUNC_0, --양수까지만 출력, 소수점 1번쨰 버림
+       TRUNC(1234.5678, 1)AS TRUNC_1, --소수점 1번쨰 자리까지 출력 소수점 2번쨰 버림
+       TRUNC(1234.5678, 2)AS TRUNC_2, --소수점 2번쨰 자리까지 출력 소수점 3번쨰 버림
+       TRUNC(1234.5678, -1)AS TRUNC_MINUS1, -- -양수 자리 지정, 양수 1번쨰 자리에서 버림
+       TRUNC(1234.5678, -2)AS TRUNC_MINUS2 -- -양수 자맂 지정, 양수 2번쨰 자리에서 버림
+       FROM DUAL;
+       
+--지정한 숫자와 가까운 정수를 CEIL, FLOOR 함수
+CEIL([숫자)필수)]
+FLOOR([숫자(필수)]
+
+SELECT CEIL(3.14),
+       FLOOR(3.14),
+       CEIL(-3.14),
+       FLOOR(-3.14)
+FROM DUAL;
+
+
+--나머지 MOD GKATN
+MOD[(나눗셈 될 숫자 (필수)], [나눌숫자 (필수)]
+
+SELECT MOD(15,6),
+MOD(10,2),
+MOD(11,2)
+FROM DUAL;
+
+-------------------------------------------------------------------
+--날짜 데이터를 다루는 함수
+
+--날짜 데이터에 연산도 가능
+--날짜 데이터 + 숫자 : 날짜 데이터에서 숫자만큼 일수 더해서 이후 날짜 출력
+--날짜 데이터 - 숫자 : 날짜 데이터에서 숫자만큼 일수 빼서 이후 날짜 출력
+--날짜 데이터 + 날짜 데이터 : 연산불가, 지원X
+--날짜 데이터 - 날자 데이터 : 두 날짜간의 일수 차이
+
+-날짜데이터 SYSDATE : 현재 날짜 출력
+SELECT  SYSDATE AS NOW,
+SYSDATE - 1 AS YESTERDAY,
+SYSDATE + 1 AS TOMORROW
+FROM DUAL;
+
+--ADD_ MONTHS 함수 : 개월 수 만큼 더한 날짜 출력
+ADD_MONTHS([날짜 데이터 (필수)], [더할 개월수 (정수)(필수)])
+
+SELECT SYSDATE,
+ADD_MONTHS(SYSDATE, 3)
+FROM DUAL;
+
+--입사일에서  10주년 날짜 출력
+SELECT EMPNO, ENAME, HIREDATE,
+       ADD_MONTHS(HIREDATE, 120) AS WORK10YEAR
+       FROM EMP;
+       
+-- 입사 32년 미만인 사원데이터 출력
+SELECT EMPNO, ENAME, HIREDATE, SYSDATE
+       FROM EMP
+       WHERE ADD_MONTHS(HIREDATE,484) > SYSDATE;
+       
+-- 두 날짜 사이의 개월 수 차이를 구한 MONTHS_ BETWEEN 함수
+MONTHS_BETWEEN([날짜 데이터1(필수)], [날짜 데이터2(필수)])
+
+SELECT ENPNO, ENAME, HIRDATE, SYSDATE,
+MONTHS_BETWEEN(HIREDATE, SYSDATE) AS MONTHS1,
+MONTHS_BETWEEN(SYSDATE, HIREDATE ) AS MONTHS2,
+TRUNC(MONTHS_BETWEEN(SYSDATE, HIREDATE)) AS MONTHS3
+FROM EMP;
+
+--돌아오는 요일, 달의 마지막 날짜 구하는
+--NEXT_DAY : 다가오는 특정 요일
+NEXT_DAY([날짜 데이터(필수)],[요일 문자(필수)])
+--LAST DAY : 그 달의 마지막 날짜
+LAST_DAY([날짜 데이터(필수)])
+
+SELECT SYSDATE,
+NEXT_DAY(STSDATE, '월요일'),
+LAST_DAY(SYSDATE)
+FROM DUAL;
+
+--날짜의 반올림, 버림을 하는 ROUND, TRUNC 함수
+--소수점 위치 정보를 입력하지 않고 반올림, 버림의 기준이 될 포멧(FORMAT)값을 지정
+숫자 데이터 : round[숫자(필수),[반올림 위치])
+             trunc[숫자(필수,[버림 위치]
+날짜 데이터:   round[날짜데이터(필수,[반올림 기준 포멧]
+             Tound[날짜데이터(필수,[버림 기준 포멧]
+             
+포멧
+CC, SCC                                   :네 자리 연도의 끝 두자리를 기준으로 사용  
+SYYY, YYYY, YEAR, SYSEAR, YYY ,YY ,Y       :날짜 데이터의 해당 연.월.일의 7월1일 기준
+IYYY, IYY, IY ,I                        :ISO 8601에서 제정한 날짜 기준년도 포멧을 기준
+Q                                              :각 분기의 두 번쨰 달의 16일을 기준 : 쿼터 1~3,4~6,7~9,10~12
+MONYH, MON, MM ,RM                          :각 달의 16일 기준 
+MW                                         :해당 연도의 몇주(1~53번째 주)를 기준
+IW                                          :ISO 8601에서 제정한 날짜 기준 해당 연도의 주(WEEK)를 기준
+W                                             :해당 월의 주(1~5번쨰 주)를 기준
+DDD, DD, J                                  :해당 일의 정오(12:00:00)를 기준
+DAY, DY ,D                                    :한 주가 시작되는 날짜를 기준
+HH,HH12,HH24                                  :해당일의 시간을 기준
+MI                                          :해당일 시간의 분을 기준
+
+SELECT SYSDATE,
+    ROUND(SYSDATE,'CC') AS FOR_CC,        년도의 마지막 2두자리 : 50년    1년,   100년
+    ROUND(SYSDATE,'YYYY') AS FOR_YYYY,    YYYY, 7월1일 : YYYY +1, YYYY
+    ROUND(SYSDATE,'Q') AS FOR_Q, 4~6      1~3,4~6,7~9,10~12
+    ROUND(SYSDATE,'DDD') AS FOR_DDD,      하루 날짜 : 12시가 넘었다면 하루+1 12시가 넘지 않았다면 하루
+    ROUND(SYSDATE,'HH') AS FOR_HH         시간 : 각 시간의 30분 기준 : 시간+1, 넘지 않았다면 시간
+    FROM DUAL;
+ 
+ --년도 출력 형식 보기   
+SELECT VALUE FROM NLS_SESSION_PARAMETERS WHERE PARAMETER = "NLS_DATE_FORMAT";
+--년도 출력 형식 변환
+--ALTER SESSION SET NLS_DATE_FORMAT = YYY/MM/DD HH12MISS;
+
+ALTER SESSION SET NLS_DATE_FORMAT =' RRRR/MM/DD';
+
+--자료형을 반환하는 형 변환 함수
+--숫자와 문자열(숫자)를 더하여 출력 하기
+
+SELECT EMPNO, ENAME, EMPNO + '500'
+ FORM EMP
+ WHERE ENAME = 'SMITH';
+ 
+ -자동 형 변환
+ +
+ 
+ DESC EMP;
+ 
+ SELECT 'ABCD' + EMPNO, EMPNO
+ FROM EMP
+ WHERE ENAME = 'SMITH';
+ 
+--TO_CHAR : 숫자 또는 날짜 데이터를 문자 데이터로 변환
+TO_CHAR([날짜데이터[필수], '[출력되길 원하는 문자형태(필수)]')
+
+SELECT TO_CHAR(SYSDATE,'YYY/MM/DD HH24 :MI:SS')AS "현재 날짜 시간"
+FROM DUAL:
+
+CC         :세기
+YYYY,RRRR  :연도(4자리 숫자)
+YY, RR     :연도(2자리 숫자)
+MM         :월(2자리숫자)
+MON        :월(언어별 월 이름 약자
+NONTH      :월(언어별 월 이름 전체  
+DD         :일(2자리 숫자)
+DDD        :1년 중 몇일(1~365)
+DY         :요일(언어별 요일 이름 약자)
+DAY        :요일(언어별 요일 이름 전체)
+W          :1년 중 몇 번째 주(1~53)
+
+SELECT SYSDATE,
+TO_CHAR(SYSDATE, 'MM')AS MM,
+TO_CHAR(SYSDATE, 'MON')AS MON,       --APR
+TO_CHAR(SYSDATE, 'MONTH')AS NOMTH,   --APRIL
+TO_CHAR(SYSDATE, 'DD')AS DD,
+TO_CHAR(SYSDATE, 'DY')AS DY,
+TO_CHAR(SYSDATE, 'DAY')AS DAY
+FROM DUAL;
+
+--특정 언어에 맞춰서 날짜 출력
+TO_CHAR([날짜 데이터(필수)], '[출력되기 원하는 문자형태(필수)]'
+'NLS_DATE_LANGUAGE = language'(선택))
+
+SELECT SYSDATE,
+ TO_CHAR(SYSDATE, 'MM') AS MM,
+ TO_CHAR(SYSDATE, 'MON', 'NLS_DATE_LANGUAGE = KOREAN') AS MON_KOR,
+ TO_CHAR(SYSDATE, 'MON', 'NLS_DATE_LANGUAGE = JAPANESE') AS MON_JPN,
+ TO_CHAR(SYSDATE, 'MON', 'NLS_DATE_LANGUAGE = ENGLISH') AS MON_ENG,
+ TO_CHAR(SYSDATE, 'MONTH', 'NLS_DATE_LANGUAGE = KOREAN') AS MONTH_KOR,
+ TO_CHAR(SYSDATE, 'MONTH', 'NLS_DATE_LANGUAGE = JAPANESE') AS MONTH_JPN,
+ TO_CHAR(SYSDATE, 'MONTH', 'NLS_DATE_LANGUAGE = ENGLISH') AS MONTH_ENG
+ FROM DUAL;
+
+
+SELECT SYSDATE,
+ TO_CHAR(SYSDATE, 'MM') AS MM,
+ TO_CHAR(SYSDATE, 'DD') AS DD,
+ TO_CHAR(SYSDATE, 'DY', 'NLS_DATE_LANGUAGE = KOREAN') AS DY_KOR,
+ TO_CHAR(SYSDATE, 'DY', 'NLS_DATE_LANGUAGE = JAPANESE') AS DY_JPN,
+ TO_CHAR(SYSDATE, 'DY', 'NLS_DATE_LANGUAGE = ENGLISH') AS DY_ENG,
+ TO_CHAR(SYSDATE, 'DAY', 'NLS_DATE_LANGUAGE = KOREAN') AS DAY_KOR,
+ TO_CHAR(SYSDATE, 'DAY', 'NLS_DATE_LANGUAGE = JAPANESE') AS DAY_JPN,
+ TO_CHAR(SYSDATE, 'DAY', 'NLS_DATE_LANGUAGE = ENGLISH') AS DAY_ENG
+ FROM DUAL;
+ 
+ --시간 형식 지정하여 출력
+ HH24               :24시간 형식
+ HH, HH12           :12시간 형식
+ MI                 :분
+ SS                 :초
+ AM,PM,A.M , P.M    :오전,오후 표시
+ 
+ SELECT SYSDATE,
+  TO_CHAR(SYSDATE, 'HH24:MI:SS') AS HH24MISS,
+  TO_CHAR(SYSDATE, 'HH12:MI:SS:AM') AS HHMISS_AM,
+  TO_CHAR(SYSDATE, 'HH:MI:SS P.M.') AS HHMISS_PM
+  FROM DUAL;
+  
+  SELECT SYSDATE,
+  TO_CHAR(SYSDATE, 'HH24:MI:SS') AS HH24MISS,
+  TO_CHAR(SYSDATE, 'HH12:MI:SS:AM') AS HHMISS_AM,
+  TO_CHAR(SYSDATE, 'HH:MI:SS P.M.','NLS_DATE_LANGUAGE = ENGLISH') AS HHMISS_PM
+  FROM DUAL;
+ 
+ --숫자 데이터를 지정할 수 있는 형식
+ 9 : 숫자의 한자리를 의미(빈 자리를 채우지 않음)
+ 0 : 빈자리를 채움
+ $ : 달러($)표시를 붙여서 출력
+ L : L(LOCAL)지역 화폐 단위 기호를 붙여서 출력
+ . : 소수점 표시
+ , : 천 단위 구분기호를 표시
+ 
+ SELECT SAL,
+ TO_CHAR(SAL, '$999,999') AS SAL_$,
+ TO_CHAR(SAL, 'L999,999') AS SAL_L,
+ TO_CHAR(SAL, '999,999.00') AS SAL_1,
+ TO_CHAR(SAL, '000,999,999.00') AS SAL_2,
+ TO_CHAR(SAL, '000999999.99') AS SAL_3,
+ TO_CHAR(SAL, '999,999,00') AS SAL_4
+ FROM EMP;
+ 
+ 
+--TO_NUMBER : 문자 데이터를 숫자 데이터로 변환
+SELECT 1300 - '1500',
+              '1300' + 1500
+FROM DUAL;
+
+SELECT TO_NUMBER('1,300' , '999,999') - TO_NUMBER('1,500', '999,999')
+FROM DUAL;
+
+--TO_DATE : 문자 데이터를 날짜 데이터로 변환
+TO_DATE('[문자열 데이터 (필수)]', 'YYYY-MM-DD') AS TODATE1,
+ 
+SELECT TO_DATE('2018-07-14','YYYY-MM-DD')AS TODATE1, --위쪽에 년도출력형식 변환 변형해서 사용함--
+TO_DATE('20180714','YYYY-MM-DD')AS TODATE2 
+FROM DUAL;
+
+--TO_DATE 함수와 비교 연산자를 사용하여 특정 년도 이후 입사한 사원 찾기
+SELECT *
+FROM EMP
+WHERE HIREDATE > TO_DATE('1981/06/01', 'YYYY/MM/DD'); --1981년 6월 1일 이후 입사자
+
+SELECT TO_DATE('49/12/10', 'YY/MM/DD') AS YY_YEAR_49,   --YY : 2000년 이후 인식      2049:
+TO_DATE('49/12/10', 'RR/MM/DD') AS RR_YEAR_49,            --RR : 1900년 표기법         2049
+TO_DATE('50/12/10', 'YY/MM/DD') AS YY_YEAR_50,        --YY : 20500
+TO_DATE('50/12/10', 'RR/MM/DD') AS RR_YEAR_50,          --RR : 50 -> 1950/12/1
+TO_DATE('51/12/10', 'YY/MM/DD') AS YY_YEAR_51,         --YY : 2051
+TO_DATE('51/12/10', 'RR/MM/DD') AS RR_YEAR_51            --RR : 50 -> 1951/12/1
+FROM DUAL;
+
+RR : 주의 : 1900년대 표시법
+-- NULL 처리 함수 : NULL - 데이터 자체가 없다. 빈공간 %(SPACE바 는 빈공간이 아니다)%
+-- NVL : NULL이 아니면 그대로, NULL이면 지정한 값 : 데이터를 입력 안하더라도 자동으로 지정한 값을 대입
+NVL([NULL 인지 여부를 검사할 데이터 또는 열(필수)]),[앞의 데이터가 NULL일 경우 반환할 데이터](필수))
+
+SELECT * FROM EMP;
+SELECT EMPNO, ENAME, SAL, COMM, SAL+COMM,
+       NVL(COMM,0),
+       SAL + NVL(COMM,0)
+       FROM EMP;
+
+
+-- NVL2 : NULL일떄와 NULL 아닐 떄 값을 각각 지정
+NVL2([NULL인지 여부를 검사할 데이터 또는 열(필수)],
+ [앞 데이터가NULL이 아닐 경우 반환할 데이터 또는 계산식(필수)],
+ [앞 데이터가 NULL일 경우 반환할 데이터 또는 계산식(필수)]
+ 
+ SELECT EMPNO, ENAME, COMM,
+   NVL2(COMM, 'O' , 'X'),
+   NVL2(COMM, SAL*12+COMM, SAL*12) AS ANNSAL
+   FROM EMP;
+   
+------------------------------------------------------------------------
+--상황에 따라 다른 데이터를 반환하는 DECODE함수와 CASE문
+------------------------------------------------------------------------
+--DECODE 함수
+-- DECODE([검사 대상이 될 열 또는 데이터, 연산이나 함수의 결과],
+          [조건1],[데이터가 조건 1과 일치할때 반환할 결과],
+          [조건2],[데이터가 조건 1과 일치할때 반환할 결과],
+          [조건3],[데이터가 조건 1과 일치할때 반환할 결과],
+          [조건4],[데이터가 조건 1과 일치할때 반환할 결과],
+          .......
+          [조건n],[데이터가 조건 1과 일치할때 반환할 결과],
+          [위 조건 1~ 조건n 과 일치한 경우가 없을떄 반환할 결과])
+          
+--EMP 테이블에서 직책이 MANAGER인 사람은 급여의 10% 인상 급여
+                      SALESMAN인 사람은 급여의5% 인상 급여
+                      ANALYST인 사람은 급여의0% 인상 급여
+                      나머지인 사람은 급여의 3% 인상 급여
+                      
+SELECT ENPNO, ENAME, JOB, SAL,
+       DECODE(JOB,
+              'MANAGER', SAL*1.1,
+              'SALESMAN', SAL*1.05,
+              'ANALYST', SAL,
+              SAL*1.03)AS UPSAL
+ FROM EMP;
+ 
