@@ -1,0 +1,686 @@
+-- 테이블에 데이터 삭제 : DELETE문 : DELETE 시 유의점 : WHERE 조건문 사용 권장
+
+-- 샘플 테이블 생성
+CREATE TABLE EMP_TEMP2
+  AS SELECT * FROM EMP;
+
+SELECT * FROM EMP_TEMP2;
+
+-- 기본 형식
+DELETE [FROM] [테이블 이름]
+[WHERE 삭제할 대상 행을 선별하기 위한 조건식];
+
+DELETE FROM EMP_TEMP2;
+
+ROLLBACK;
+
+-- WHERE 조건문을 이용해서 직업이 MANAGER 만 삭제
+DELETE FROM EMP_TEMP2
+  WHERE JOB = 'MANAGER';
+
+SELECT * FROM EMP_TEMP2;
+
+-- 서브 쿼리를 사용하여 데이터 삭제
+-- 급여등급 3등급(1401~2000) 사람중에서 30번 부서의 사원들만 삭제 
+
+-- 급여등급 3등급(1401~2000) 사람중에서 30번 부서의 사원 EMPNO 출력
+
+SELECT *
+  FROM EMP_TEMP2 E, SALGRADE S
+    WHERE E.DEPTNO = 30
+    AND E.SAL BETWEEN S.LOSAL AND S.HISAL
+    AND S.GRADE = 3;
+
+
+
+DELETE FROM EMP_TEMP2
+  WHERE EMPNO IN (SELECT EMPNO
+                    FROM EMP_TEMP2 E, SALGRADE S
+                    WHERE E.DEPTNO = 30
+                     AND E.SAL BETWEEN S.LOSAL AND S.HISAL
+                     AND S.GRADE = 3);
+                     
+SELECT * FROM EMP_TEMP2;                     
+
+DELETE FROM EMP_TEMP2;
+
+
+-- 하나의 단위로 데이터를 처리하는 트랜잭션
+-- 트랜잭션(transaction)
+
+CREATE TABLE DEPT_TCL
+  AS SELECT * FROM DEPT;
+  
+SELECT * FROM DEPT_TCL;  
+  
+-- INSERT, UPDATE, DELETE 
+INSERT INTO DEPT_TCL VALUES(50, 'DATABASE', 'SEOUL');
+
+UPDATE DEPT_TCL SET LOC = 'BUSAN' WHERE DEPTNO = 40;
+
+DELETE FROM DEPT_TCL WHERE DNAME = 'RESEARCH';
+
+SELECT * FROM DEPT_TCL;     --  확인 : DML 명령어들이 실행 이상 : ROLLBACK (취소)  : DML 명령어 이상이 없다면 : COMMIT(확인)
+
+-- 트랜잭션 취소 : ROLLBACK
+ROLLBACK;
+
+SELECT * FROM DEPT_TCL;
+
+-- 트랜잭션 적용 : DML - 데이터 조작명령어 
+
+-- 트랜잭션 반영 : COMMIT
+INSERT INTO DEPT_TCL VALUES(50, 'NETWORK', 'SEOUL');
+
+UPDATE DEPT_TCL SET LOC = 'BUSAN' WHERE DEPTNO = 20;
+
+DELETE FROM DEPT_TCL WHERE DEPTNO = 40;
+
+SELECT * FROM DEPT_TCL;
+
+COMMIT;
+
+-- 세션 : 어떤 활동을 위한 시간이나 기간 
+-- 데이터베이스 접속을 시작해서 종료 : 하나의 세션 : 여러개의 트랜잭션이 존재
+
+-- 읽기 일관성
+
+DELETE FROM DEPT_TCL WHERE DEPTNO = 50;
+
+SELECT * FROM DEPT_TCL;
+
+COMMIT;
+
+
+UPDATE DEPT_TCL SET LOC='SEOUL'
+  WHERE DEPTNO=30;
+
+SELECT * FROM DEPT_TCL;
+
+COMMIT;
+
+SELECT * FROM DEPT_TCL;
+
+-- 객체를 생성, 변경, 삭제하는 데이터 정의어 (DDL : Data Definition Language) 
+-- DDL : 데이터 조작어를 실행하면 트랜잭션에 대한 COMMIT이 자동으로 이루어진다.  ROLLBACK이 불가능
+-- 테이블을 생성하는 CREATE 
+-- 테이블 생성 기본 형식
+CREATE TABLE 소유계정.테이블 이름(
+  열1 이름 열1 자료형,
+  열2 이름 열2 자료형,
+  ...
+  열n 이름 열n 자료형
+);
+
+-- 테이블 이름 생성 규칙
+-- 1. 테이블 이름은 문자로 시작해야 한다.(한글도 가능하며 숫자로 시작할 수 없음)
+-- 2. 테이블 이름은 30byte 이하여야 한다.(즉, 영어는 30자, 한글은 15자까지 사용 가능)
+-- 3. 같은 사용자 소유의 테이블 이름은 중복 될 수 없다.
+-- 4. 테이블 이름은 영문자(한글 가능), 숫자(0-9)와 특수문자 $, #, _ 를 사용할 수 있다.
+-- 5. SQL 키워드는 테이블 이름으로 사용할 수 없다.(SELECT, FROM 등은 테이블 이름으로 사용 불가)
+
+-- 열 이름 생성 규칙
+-- 1. 열 이름은 문자로 시작해야 한다.
+-- 2. 열 이름은 30byte 이하여야 한다.
+-- 3. 한 테이블의 열 이름은 중복 될 수 없다. (EMP 테이블에 EMPNO 열이 두 개 존재할 수 없음)
+-- 4. 열 이름은 영문자(한글 가능),  숫자(0-9)와 특수문자 $, #, _ 를 사용할 수 있다.
+-- 5. SQL 키워드는 열 이름으로 사용할 수 없다.(SELECT, FROM 등은 열 이름으로 사용 불가)
+
+-- 자료형을 각각 정의 하여 새 테이블 생성하기
+CREATE TABLE EMP_DDL(
+  EMPNO     NUMBER(4),
+  ENAME     VARCHAR2(10),
+  JOB       VARCHAR2(9),
+  MGR       NUMBER(4),
+  HIREDATE  DATE,
+  SAL       NUMBER(7,2),
+  COMM      NUMBER(7,2),
+  DEPTNO    NUMBER(2)
+);
+
+DESC EMP_DDL;
+  
+-- 기존 테이블 열 구조와 데이터를 복사하여 새 테이블 생성하기
+CREATE TABLE DEPT_DDL
+  AS SELECT * FROM DEPT;
+  
+DESC DEPT_DDL;
+
+SELECT * FROM DEPT_DDL;
+
+-- 기존 테이블 열 구조와 일부 데이터만 복사하여 새 테이블 생성하기
+CREATE TABLE EMP_DDL_30
+  AS SELECT * FROM EMP
+      WHERE DEPTNO = 30;
+
+DESC EMP_DDL_30;
+
+SELECT * FROM EMP_DDL_30;
+
+-- 기존 테이블에서 열 구조만 복사해서 새 테이블 생성 : 가져오는 테이블에서 조건을 거짓으로 만들어서
+CREATE TABLE EMPDEPT_DDL
+  AS SELECT E.EMPNO, E.ENAME, E.JOB, E.MGR, E.HIREDATE,
+             E.SAL, E.COMM, D.DEPTNO, D.DNAME, D.LOC
+     FROM EMP E, DEPT D
+     WHERE 1 <> 1;   -- 조건 부분을 거짓으로 만들어서 매칭 되는 데이터가 없게 설정 : 결과적으로 테이블 구조만 가져오게
+     
+SELECT * FROM EMPDEPT_DDL;     
+
+-- 테이블을 변경하는 ALTER : 수정
+-- ALTER 테스트 테이블 생성
+CREATE TABLE EMP_ALTER
+  AS SELECT * FROM EMP;
+  
+SELECT * FROM EMP_ALTER;  
+
+-- 테이블에 열 추가하는 ADD
+ALTER TABLE EMP_ALTER
+  ADD HP VARCHAR2(20);
+
+SELECT * FROM EMP_ALTER; 
+
+-- 열 이름을 변경하는 RENAME
+ALTER TABLE EMP_ALTER
+  RENAME COLUMN HP TO TEL;
+
+SELECT * FROM EMP_ALTER; 
+
+DESC EMP_ALTER;       -- EMPNO NUMBER(4)
+
+-- 열의 자료형을 변경하는 MODIFY
+ALTER TABLE EMP_ALTER
+  MODIFY EMPNO NUMBER(5);
+  
+DESC EMP_ALTER;
+
+문자열 -> 숫자형 변경 불가능 경우 많음
+숫자형 -> 문자열 변경 가능
+  
+-- 특정 열을 삭제할 때 사용하는 DROP
+ALTER TABLE EMP_ALTER
+  DROP COLUMN TEL;
+  
+DESC EMP_ALTER;  
+
+SELECT * FROM EMP_ALTER;
+
+-- 테이블 이름을 변경하는 RENAME
+RENAME EMP_ALTER TO EMP_RENAME;
+
+DESC EMP_RENAME;
+
+SELECT * FROM EMP_RENAME;
+
+-- 테이블의 데이터를 삭제하는 TRUNCATE
+-- 테이블의 데이터 삭제 : 
+DELETE FROM 테이블명 : 트랜잭션이 생성이 되어서 속도가 가장 느리게
+DROP TABLE 테이블명  : 테이블 자체 삭제 : 테이블 조회가 불가능
+TRUNCATE TABLE 테이블명 : 테이블 내에 데이터만 삭제 : 트랜잭션이 일어 나지 않는다. 
+
+CREATE TABLE EMP_DELETE
+  AS SELECT * FROM EMP;
+  
+CREATE TABLE EMP_DROP
+  AS SELECT * FROM EMP;  
+
+CREATE TABLE EMP_TRUNCATE
+  AS SELECT * FROM EMP;  
+
+DELETE FROM EMP_DELETE;
+DROP TABLE EMP_DROP;
+TRUNCATE TABLE EMP_TRUNCATE;
+
+-- 데이터베이스를 위한 데이터를 저장한 데이터 사전
+-- 오라클 데이터베이스 테이블은 사용자 테이블(user table)과 데이터 사전(data dictionary)으로 나뉜다.
+-- 사용자 테이블은 데이터베이스를 통해 관리할 데이터를 저장하는 테이블
+-- 데이터 사전은 데이터베이스를 구성하고 운영하는데 필요한 모든 정보를 저장하는 특수한 테이블로 데이터베이스가 생성되는 시점에 자동으로 만들어진다.
+-- 데이터 사전에는 데이터베이스 메모리.성능.사용자.권한.객체 등 오라클 데이터베이스 운영에 중요한 데이터가 보관되어 있다.
+-- 데이터 사전은 사용자가 데이터 사전 정보에 직접 접근하거나 작업하는 것을 허용하지 않는다.
+-- 데이터 사전 뷰(data dictionary view)를 제공 : SELECT문으로 정보 열람
+
+USER_XXXX : 현재 데이터베이스에 접속한 사용자가 소유한 객체 정보
+ALL_XXXX : 현재 데이터베이스에 접속한 사용자가 소유한 객체 또는 다른 사용자가 소유한 객체중 사용 허가를 받은 객체, 즉 사용 가능한 모든 객체 정보
+DBA_XXXX : 데이터베이스 관리를 위한 정보(관리자 권한 : SYSTEM, SYS 사용자만 열람 가능)
+V$_XXXX : 데이터베이스 성능 관련 정보(X$_XXXX 테이블의 뷰)
+
+-- 접속한 계정 : SCOTT
+-- SCOTT 계정에서 사용 가능한 데이터 사전
+SELECT * FROM DICT;
+SELECT * FROM DICTIONARY;
+
+-- USER_ 접두어를 가진 데이터 사전 : SCOTT 계정으로 소유하고 있는 테이블 목록 : 43개
+SELECT TABLE_NAME
+  FROM USER_TABLES;
+
+-- ALL_ 접두어를 가진 데이터 사전 : SCOTT 계정으로 사용가능 모든 테이블 목록 : 142개 
+SELECT OWNER, TABLE_NAME
+  FROM ALL_TABLES;
+
+-- DBA_ 접두어를 가진 데이터 사전 : 데이터베이스 관리를 위한 정보 (SYSTEM, SYS 계정만 열람 가능)
+SELECT * FROM DBA_TABLES;
+
+-- 인덱스 : 더 빠른 검색을 위한 인덱스
+검색 종류
+FULL SCAN : 책 : 처음부터 끝까지 다 찾아서 검색
+INDEX SCAN : 색인(차례) : 특정 지점으로 가서 바로 검색
+
+USER_INDEXES, USER_IND_COLUMNS  : 데이터 사전을 사용
+
+SELECT *
+  FROM USER_INDEXES;
+
+SELECT * 
+  FROM USER_IND_COLUMNS;
+
+-- 색인(index) 생성 
+-- 자동으로 생성 : 기본키(Primary KEY)를 설정하면 자동으로 인덱스가 생성
+-- 사용자가 지정 생성 : 인덱스 생성할 열을 선택해서 인덱스명 등을 지정으로 생성
+
+-- 인덱스 생성
+CREATE INDEX 인덱스이름
+  ON 테이블 이름(열 이름1 ASC or DESC,
+                 열 이름2 ASC or DESC,
+                  ....                 );
+                  
+-- EMP 테이블의 SAL 열에 인덱스를 생성
+CREATE INDEX IDX_EMP_SAL
+  ON EMP(SAL);
+                  
+SELECT * FROM USER_IND_COLUMNS;                  
+
+SELECT * FROM EMP WHERE SAL > 1000;
+
+
+-- 인덱스 삭제
+DROP INDEX 인덱스 이름;
+
+DROP INDEX IDX_EMP_SAL;
+
+SELECT * FROM USER_IND_COLUMNS;  
+
+-- 뷰(VIEW) : SELECT 문을 저장한 객체
+-- 뷰 사용 목적
+-- 편의성 : SELECT문의 복잡도 완화
+-- 보안성 : 테이블의 일부 데이터만 노출
+
+-- 뷰 생성 
+CREATE [OR REPLACE] [FORCE | NOFORCE] VIEW  뷰이름(열 이름1, 열 이름2, ...)
+  AS (저장할 SELECT문)
+[WITH CHECK OPTION [CONSTRAINT 제약 조건]]
+[WITH READ ONLY [CONSTRAINT 제약 조건]]
+
+-- 부서 번호가 20번인 직원, 사원번호, 사원이름, 직업, 부서번호
+SELECT EMPNO, ENAME, JOB, DEPTNO
+  FROM EMP
+  WHERE DEPTNO = 20;
+
+CREATE VIEW VW_EMP20
+  AS (SELECT EMPNO, ENAME, JOB, DEPTNO
+       FROM EMP
+      WHERE DEPTNO = 20);
+
+-- 생성한 뷰 확인
+SELECT * FROM USER_VIEWS;
+     
+-- 뷰 조회      
+SELECT * FROM VW_EMP20;      
+
+-- 뷰 삭제
+DROP VIEW VW_EMP20;
+
+
+      
+-- 인라인 뷰를 사용한 TOP-N SQL문
+-- 인라인 뷰 : SQL문에서 일회성으로 만들어서 사용하는 뷰
+
+-- 인라인뷰와 ROWNUM을 사용하면 ORDER BY 절을 통해 정렬된 결과 중 최상위 몇개 데이터만 출력하는 것이 가능하다.
+-- ROWNUM : 행의 번호를 붙히는 것
+
+SELECT ROWNUM, E.*
+  FROM EMP E;
+
+SELECT ROWNUM, E.*
+  FROM EMP E
+  ORDER BY SAL DESC;
+  
+  
+-- 인라인 뷰 (서브쿼리 사용)
+SELECT ROWNUM, E.*
+  FROM (SELECT * 
+         FROM EMP E
+         ORDER BY SAL DESC) E;
+         
+-- 인라인 뷰 (WITH절 사용) 
+WITH E AS (SELECT * FROM EMP ORDER BY SAL DESC)
+SELECT ROWNUM, E.*
+  FROM E;
+  
+-- 인라인 뷰 사용시 정렬 전에 붙힐 것인지, 정렬이 이루어지고 난 후(서브쿼리, WITH절) 에 붙힐 것인지. 
+
+-- 인라인 뷰로 TOP-N 추출하기(서브쿼리 사용)
+SELECT ROWNUM, E.*
+  FROM (SELECT *
+         FROM EMP
+         ORDER BY SAL DESC) E
+  WHERE ROWNUM <= 3;
+
+-- 인라인 뷰로 TOP-N 추출하기(WITH 사용)
+WITH E AS (SELECT * FROM EMP ORDER BY SAL DESC)
+SELECT ROWNUM, E.*
+  FROM E
+WHERE ROWNUM <= 3;  
+
+
+-- 규칙에 따라 순번을 생성하는 시퀀스
+-- 시퀀스(sequence)는 오라클 데이터베이스에서 특정 규칙에 맞는 연속 숫자를 생성하는 객체이다. (번호 생성기)
+
+SELECT MAX(글번호) + 1
+  FROM 게시판 테이블;
+  
+-- 시퀀스 생성  
+CREATE SEQUENCE 시퀀스 이름     -- 시쿼스 이름 지정
+[INCREMENT BY n]                -- 시퀀스에서 생성할 번호의 증가 값(기본값은 1) (선택)
+[START WITH n]                  -- 시퀀스에서 생성할 번호의 시작 값(기본값은 1) (선택)
+[MAXVALUE n | NOMAXVALUE]       -- 시퀀스에서 생성할 번호의 최댓값 지정,
+[MINVALUE n | NOMINVALUE]       -- 시퀀스에서 생성할 번호의 최소값 지정,
+[CYCLE | NOCYCLE]               -- 시퀀스에서 생성한 번호가 최댓값에 도달했을 경우 CYCLE이면 시작 값에서 다시 시작,NOCYCLE이면 번호 생성 중단, 에러
+[CACHE n | NOCACHE]             -- 시퀀스가 생성할 번호를 메모리에 미리 할당해 놓은 수를 지정, NOCACHE는 미리 생성하지 않도록 설정
+
+CREATE SEQUENCE SEQ_DEPT_SEQUENCE
+  INCREMENT BY 10
+  START WITH 10
+  MAXVALUE 90
+  MINVALUE 0
+  NOCYCLE
+  CACHE 2;
+  
+-- 생성한 시퀀스 확인
+SELECT *
+  FROM USER_SEQUENCES;
+  
+-- 시퀀스 사용할 테이블 생성 : DEPT 테이블을 이용해서 구조만 가져오기
+CREATE TABLE DEPT_SEQUENCE
+  AS SELECT * FROM DEPT WHERE 1 <> 1;
+
+DESC DEPT_SEQUENCE;
+
+SELECT * FROM DEPT_SEQUENCE;
+
+-- 시퀀스를 이용한 데이터 삽입 : 시퀀스 이름.CURRVAL 또는 시퀀스 이름.NEXTVAL을 사용
+INSERT INTO DEPT_SEQUENCE (DEPTNO, DNAME, LOC)
+  VALUES (SEQ_DEPT_SEQUENCE.NEXTVAL, 'DATABASE', 'SEOUL');
+  
+SELECT * FROM DEPT_SEQUENCE;  
+  
+SELECT SEQ_DEPT_SEQUENCE.CURRVAL 
+  FROM DUAL;
+  
+INSERT INTO DEPT_SEQUENCE (DEPTNO, DNAME, LOC)
+  VALUES (SEQ_DEPT_SEQUENCE.NEXTVAL, 'DATABASE', 'SEOUL');
+
+SELECT * FROM DEPT_SEQUENCE;  
+
+-- 시퀀스 수정 (ALTER SEQUENCE 시퀀스 이름)
+ALTER SEQUENCE SEQ_DEPT_SEQUENCE
+  INCREMENT BY 3
+  MAXVALUE 99
+  CYCLE;
+
+INSERT INTO DEPT_SEQUENCE (DEPTNO, DNAME, LOC)
+  VALUES (SEQ_DEPT_SEQUENCE.NEXTVAL, 'DATABASE', 'SEOUL');
+
+SELECT * FROM DEPT_SEQUENCE ORDER BY DEPTNO;  
+
+SELECT * FROM USER_SEQUENCES;
+
+-- 시퀀스 삭제
+DROP SEQUENCE 시퀀스 이름;
+DROP SEQUENCE SEQ_DEPT_SEQUENCE;
+
+-- 공식 별칭을 지정하는 동의어
+-- 동의어(synonym)는 테이블.뷰.시퀀스 등 객체 이름 대신 사용할 수 있는 다른 이름을 부여하는 객체 
+-- 동의어 : 전역변수, 별칭 : 지역변수
+
+CREATE [PUBLIC] SYNONYM 동의어이름      -- PUBLIC : 데이터베이스 내의 모든 사용자가 사용할 수 있게 설정
+FOR [사용자.][객체이름];
+
+CREATE SYNONYM E
+  FOR EMP;
+  
+SELECT * FROM E;  
+
+-- 동의어 삭제
+DROP SYNONYM E;
+
+SELECT * FROM EMP;
+
+-- 제약 조건 : 오라클에서 사용하는 제약 조건은 테이블의 특정 열에 지정
+-- 제약 조건을 지정한 열에 제약 조건에 부합하지 않는 데이터를 저장할 없다.
+-- 제약 조건 지정 방식에 따라 기존 데이터의 수정이나 삭제 가능 여부도 영향을 받습니다.
+
+SELECT * FROM USER_CONSTRAINTS;
+
+-- 빈 값을 허락하지 않는 NOT NULL
+CREATE TABLE TABLE_NOTNULL (
+  LOGIN_ID VARCHAR2(20) NOT NULL,
+  LOGIN_PWD VARCHAR2(20) NOT NULL,
+  TEL VARCHAR2(20) 
+);
+  
+DESC TABLE_NOTNULL;  
+
+INSERT INTO TABLE_NOTNULL (LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES ('TEST_ID_01', NULL, '010-1234-5678');
+  
+  
+INSERT INTO TABLE_NOTNULL (LOGIN_ID, LOGIN_PWD)
+  VALUES ('TEST_ID_01', '1234');
+  
+SELECT * FROM TABLE_NOTNULL;  
+
+-- NOT NULL 제약 조건이 지정된 열 데이터를 NULL 값으로 업데이트
+UPDATE TABLE_NOTNULL
+  SET LOGIN_PWD = NULL
+WHERE LOGIN_ID = 'TEST_ID_01';
+
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME
+  FROM USER_CONSTRAINTS;
+
+-- 제약 조건 이름 직접 지정
+CREATE TABLE TABLE_NOTNULL2 (
+  LOGIN_ID VARCHAR2(20) CONSTRAINT TBLNN2_LGNID_NN  NOT NULL,
+  LOGIN_PWD VARCHAR2(20) CONSTRAINT TBLNN2_LGNPW_NN  NOT NULL,
+  TEL VARCHAR2(20) 
+);
+
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME
+  FROM USER_CONSTRAINTS;
+
+-- 이미 생성한 테이블에 제약 조건 지정
+DESC TABLE_NOTNULL;
+
+ALTER TABLE TABLE_NOTNULL
+  MODIFY(TEL NOT NULL);
+  
+SELECT * FROM TABLE_NOTNULL;  
+
+-- 이미 생성한 테이블에 데이터 부분에 제약조건(NULL 로 입력 되어 있으면 NOT NULL 설정이 불가능하다) : NULL 부분에 데이터를 삽입하고 제약조건변경
+
+UPDATE TABLE_NOTNULL
+  SET TEL='010-1234-5678'
+  WHERE LOGIN_ID = 'TEST_ID_01';
+  
+ALTER TABLE TABLE_NOTNULL
+  MODIFY(TEL NOT NULL);  
+
+
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME
+  FROM USER_CONSTRAINTS;
+
+ALTER TABLE TABLE_NOTNULL2
+  MODIFY(TEL CONSTRAINT TBLNN_TEL_NN NOT NULL);  
+  
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME
+  FROM USER_CONSTRAINTS;  
+  
+DESC TABLE_NOTNULL;  
+DESC TABLE_NOTNULL2;
+
+
+ALTER TABLE TABLE_NOTNULL2
+  MODIFY(TEL CONSTRAINT TBLNN2_TEL_NN NOT NULL);  
+
+-- 이미 생성된 제약 조건의 이름 변경  
+ALTER TABLE TABLE_NOTNULL2
+   RENAME CONSTRAINT TBLNN_TEL_NN TO TBLNN2_TEL_NN;
+  
+SELECT *
+  FROM USER_CONSTRAINTS;    
+  
+  
+SYS_C0011093  -> TBLNN_LGNID_NN
+SYS_C0011094  -> TBLNN_LGNPW_NN
+SYS_C0011097  -> TBLNN_TEL_NN
+ALTER TABLE TABLE_NOTNULL
+   RENAME CONSTRAINT SYS_C0011093 TO TBLNN_LGNIDL_NN;
+ALTER TABLE TABLE_NOTNULL
+   RENAME CONSTRAINT SYS_C0011094 TO TBLNN_LGNPW_NN;
+ALTER TABLE TABLE_NOTNULL
+   RENAME CONSTRAINT SYS_C0011097 TO TBLNN_TEL_NN;   
+   
+   
+-- 제약 조건 삭제
+ALTER TABLE TABLE_NOTNULL2
+  DROP CONSTRAINT TBLNN2_TEL_NN;
+  
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME
+  FROM USER_CONSTRAINTS;    
+  
+  
+-- 중복되지 않는 값 UNIQUE : 값이 유일(중복허용X), NULL 허용
+
+-- 테이블 생성하며 제약조건 지정 : UNIQUE
+CREATE TABLE TABLE_UNIQUE (
+  LOGIN_ID VARCHAR2(20) UNIQUE,
+  LOGIN_PWD VARCHAR2(20) NOT NULL,
+  TEL VARCHAR2(20)
+);
+
+DESC TABLE_UNIQUE;
+
+-- 제약 조건 확인
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME, SEARCH_CONDITION
+  FROM USER_CONSTRAINTS
+  WHERE TABLE_NAME = 'TABLE_UNIQUE';    
+
+-- 중복을 허락하지 않는 UNIQUE
+INSERT INTO TABLE_UNIQUE (LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES('TEST_ID_01', 'PWD01', '010-1234=5678');
+  
+SELECT * FROM TABLE_UNIQUE;  
+  
+INSERT INTO TABLE_UNIQUE (LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES('TEST_ID_02', 'PWD01', '010-1234=5678');  
+  
+SELECT * FROM TABLE_UNIQUE;  
+  
+INSERT INTO TABLE_UNIQUE (LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES(NULL, 'PWD01', '010-1234=5678');  
+  
+SELECT * FROM TABLE_UNIQUE; 
+
+UPDATE TABLE_UNIQUE
+  SET LOGIN_ID='TEST_ID_03'
+WHERE LOGIN_ID IS NULL;
+
+-- 제약 조건 이름 지정 : 1. 테이블 생성 지정, 2. RENAME 이름 수정
+-- 테이블 생성하며 제약 조건 이름 직접 지정
+CREATE TABLE TABLE_UNIQUE2 (
+  LOGIN_ID VARCHAR2(20) CONSTRAINT TBLUNQ2_LGNID_UNQ UNIQUE,
+  LOGIN_PWD VARCHAR2(20) CONSTRAINT TBLUNQ2_LGNPW_NN NOT NULL,
+  TEL VARCHAR2(20)
+);
+
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME, SEARCH_CONDITION
+  FROM USER_CONSTRAINTS
+  WHERE TABLE_NAME = 'TABLE_UNIQUE2';    
+
+-- 이미 생성한 테이블 열에 UNIQUE 제약 조건 추가하기
+ALTER TABLE TABLE_UNIQUE
+  MODIFY(TEL UNIQUE);       --- TEL 열에 동일한 값들이 들어가 있어서 수정이 되지 않는다.
+
+SELECT * FROM TABLE_UNIQUE;
+
+UPDATE TABLE_UNIQUE
+  SET TEL = NULL;
+
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME, SEARCH_CONDITION
+  FROM USER_CONSTRAINTS;
+
+-- UNIQUE 제약 조건을 걸면서 이름 직접 지정
+ALTER TABLE TABLE_UNIQUE2
+  MODIFY(TEL CONSTRAINT TBLUNQ_TEL_UNQ UNIQUE);
+
+ALTER TABLE TABLE_UNIQUE
+  RENAME CONSTRAINT SYS_C0011104 TO TBLUNQ2_TEL_UNQ;
+
+SYS_C0011104
+
+-- 제약 조건 삭제
+ALTER TABLE TABLE_UNIQUE2
+  DROP CONSTRAINT TBLUNQ_TEL_UNQ;
+
+
+-- PRIMARY KEY : 값이 유일(중복허용X), NULL 허용X, 자동 INDEX 색인 생성
+-- 테이블 생성하며 제약 조건 지정
+CREATE TABLE TABLE_PK (
+  LOGIN_ID VARCHAR2(20) PRIMARY KEY,
+  LOGIN_PWD VARCHAR2(20) NOT NULL,
+  TEL  VARCHAR2(20)
+);
+
+DESC TABLE_PK;
+
+SELECT OWNER, CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME, SEARCH_CONDITION
+  FROM USER_CONSTRAINTS;
+
+SELECT INDEX_NAME, TABLE_OWNER, TABLE_NAME
+  FROM USER_INDEXES;
+
+-- 테이블을 생성하며 제약 조건 이름 직접 지정하기
+CREATE TABLE TABLE_PK2 (
+  LOGIN_ID VARCHAR2(20) CONSTRAINT TBLPK2_LGNID_PK PRIMARY KEY,
+  LOGIN_PWD VARCHAR2(20) CONSTRAINT TBLPK2_LGNPW_NN NOT NULL,
+  TEL  VARCHAR2(20)
+);
+
+
+-- PRIMARY KEY 제약 조건을 중복값 허용 X
+INSERT INTO TABLE_PK(LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES('TEST_ID_01', 'PWD01', '010-1234-5678');
+  
+SELECT * FROM TABLE_PK;  
+
+INSERT INTO TABLE_PK(LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES('TEST_ID_01', 'PWD02', '010-2345-6789');
+  
+INSERT INTO TABLE_PK(LOGIN_ID, LOGIN_PWD, TEL)
+  VALUES(NULL, 'PWD02', '010-2345-6789');  
+
+
+
+CREATE TABLE TABLE_PK (
+  LOGIN_ID VARCHAR2(20) PRIMARY KEY,
+  LOGIN_PWD VARCHAR2(20) NOT NULL,
+  TEL  VARCHAR2(20)
+);
+
+CREATE TABLE TABLE_PK (
+  LOGIN_ID VARCHAR2(20),
+  LOGIN_PWD VARCHAR2(20) NOT NULL,
+  TEL  VARCHAR2(20),
+  PRIMARY KEY (LOGIN_ID)  
+);
+
+-- 외래키 
+
